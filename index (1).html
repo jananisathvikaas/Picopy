@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Picopy — Turn AI Chats into Study Documents</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- PptxGenJS for PowerPoint export -->
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <!-- docx for Word export -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+  <!-- FileSaver for downloads -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <div class="logo-box">📋</div>
+      <span>Picopy</span>
+    </div>
+    <div class="nav-links">
+      <a href="#converter">Convert</a>
+      <a href="#flashcards-section">Flashcards</a>
+      <a href="#how">How it works</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">✨ No signup. No payment. 100% Free.</div>
+    <h1>Turn your AI chats into<br /><span>beautiful study documents</span></h1>
+    <p>Paste any conversation from ChatGPT, Claude, or Gemini.<br />Download as PDF, Word, PowerPoint, or Text — instantly.</p>
+    <a href="#converter" class="hero-btn">Start converting free →</a>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-title">Paste your chat</div><div class="step-desc">Copy any AI conversation and paste it in the box</div></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">2</div><div class="step-title">Pick a format</div><div class="step-desc">Choose PDF, Word, PowerPoint, or plain text</div></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">3</div><div class="step-title">Download</div><div class="step-desc">Your formatted document downloads instantly</div></div>
+    </div>
+  </section>
+
+  <!-- CONVERTER -->
+  <section class="converter-section" id="converter">
+    <div class="converter-card">
+      <h2>Convert your chat</h2>
+      <p class="converter-sub">Paste your AI conversation below</p>
+
+      <textarea id="chat-input" placeholder="Paste your conversation here...
+
+Example:
+You: What is photosynthesis?
+AI: Photosynthesis is the process by which plants use sunlight, water and CO2 to make food.
+
+You: What are the two stages?
+AI: The two main stages are the light-dependent reactions and the Calvin cycle."></textarea>
+
+      <!-- FORMAT PICKER -->
+      <div class="format-label">Choose your output format:</div>
+      <div class="format-row">
+        <button class="fmt-btn selected" data-fmt="pdf" onclick="selectFormat(this)">
+          <span class="fmt-icon">📄</span>
+          <span class="fmt-name">PDF</span>
+        </button>
+        <button class="fmt-btn" data-fmt="word" onclick="selectFormat(this)">
+          <span class="fmt-icon">📝</span>
+          <span class="fmt-name">Word</span>
+        </button>
+        <button class="fmt-btn" data-fmt="ppt" onclick="selectFormat(this)">
+          <span class="fmt-icon">📊</span>
+          <span class="fmt-name">PowerPoint</span>
+        </button>
+        <button class="fmt-btn" data-fmt="txt" onclick="selectFormat(this)">
+          <span class="fmt-icon">📃</span>
+          <span class="fmt-name">Text</span>
+        </button>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="action-row">
+        <button class="convert-btn" id="convert-btn" onclick="convertChat()">
+          ⚡ Convert &amp; Download
+        </button>
+        <button class="copy-btn" onclick="copyText()">
+          📋 Copy text
+        </button>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-wrap" id="progress-wrap" style="display:none;">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p class="progress-label" id="progress-label">Formatting your document...</p>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="success-box" id="success-box" style="display:none;">
+        ✅ Done! Your document has been downloaded.
+      </div>
+    </div>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section class="flashcards-section" id="flashcards-section" style="display:none;">
+    <h2>Flashcard mode</h2>
+    <p class="fc-sub">Click any card to reveal the answer</p>
+    <div class="flashcards-grid" id="flashcards-grid"></div>
+    <button class="fc-close" onclick="closeFlashcards()">✕ Close flashcards</button>
+  </section>
+
+  <!-- LIMIT POPUP -->
+  <div class="popup-overlay" id="popup-overlay" style="display:none;">
+    <div class="popup-box">
+      <div class="popup-icon">⏰</div>
+      <h3>Daily limit reached!</h3>
+      <p>You've used all 50 free conversions today.<br />Come back tomorrow for more!</p>
+      <p class="popup-sub">Or share Picopy with a friend to unlock more conversions.</p>
+      <button class="popup-share" onclick="shareApp()">📤 Share Picopy</button>
+      <button class="popup-close" onclick="closePopup()">Maybe later</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <footer class="footer">
+    <div class="footer-logo">📋 Picopy</div>
+    <p>Made for students who learn smarter, not harder.</p>
+    <p class="footer-copy">© 2025 Picopy · Free forever for students</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
